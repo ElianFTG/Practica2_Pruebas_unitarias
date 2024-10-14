@@ -14,10 +14,32 @@ from game_control import *
             (pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP),(False, False, True))
         ]
 )
-
 def test_get_keypress(event, expected):
     assert get_keypress(event) == expected
 
 
-def test_select_move_color():
-    pass
+@pytest.mark.parametrize(
+        "select_L,select_R,selected,result",
+        [
+            (0,1,None,1),
+            (0,1,3,3),
+            (1,0,0,0),
+            (0,1,1,2),
+            (1,0,3,2)
+        ]
+)
+def test_select_move_color(select_L, select_R,selected,result):
+    assert select_move_color(select_L, select_R,selected) == result
+
+@pytest.mark.parametrize(
+    "selected,result",
+    [
+        (None,(0,0,0)),
+        (1,(0,1,0)),
+        # (None,()),
+        # (None,()),
+        # (None,()),
+    ]
+)
+def test_player_LR_selection_color(selected,result):
+    assert player_LR_selection_color(selected) == result

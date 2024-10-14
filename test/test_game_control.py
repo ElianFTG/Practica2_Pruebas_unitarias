@@ -43,3 +43,16 @@ def test_select_move_color(select_L, select_R,selected,result):
 )
 def test_player_LR_selection_color(selected,result):
     assert player_LR_selection_color(selected) == result
+
+
+@pytest.mark.parametrize(
+        "select_L, select_R, players, selected,result",
+        [
+            (1,0,[1,1,1,1],None,0),
+            (0,1,[1,1],2,1),
+            (0,1,[1,1,1,1],None,1)
+
+        ]
+)
+def test_select_move_target(select_L, select_R, players, selected,result):
+    assert select_move_target(select_L, select_R, players, selected) == result

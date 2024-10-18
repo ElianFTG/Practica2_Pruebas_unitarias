@@ -120,3 +120,7 @@ class Card:
     def play_card(self, boardname):
         self.set_Owner(None)
         boardname.update_Board(self)
+
+    def set_color_and_type(self, color, type):
+        self.color = color
+        self.type = type

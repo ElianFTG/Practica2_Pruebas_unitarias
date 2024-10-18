@@ -137,7 +137,7 @@ def card_played_type(board, deck, player, players):
     O(n) runtime
     """
     if board.card_stack == []:  # catch for empty board
-        return turn_iterator
+        return board.turn_iterator
 
     drop_again = False
     played_type = board.type

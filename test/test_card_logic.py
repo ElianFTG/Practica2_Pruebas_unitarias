@@ -8,7 +8,7 @@ CARD_IMAGE_PATH = "small_cards/"
 
 ### Funcion card_allowed
 
-# Test 1: El mazo del tablero está vacío, cualquier carta es permitida
+# Test 1: El mazo del tablero está vacio, cualquier carta es permitida
 def test_card_allowed_board_empty():
     player = Player(name="Test Player")
     player.hand = [Card(name="r-1", filename=CARD_IMAGE_PATH + "red_1.png"), 
@@ -96,7 +96,7 @@ def test_card_allowed_multiple_valid_cards():
 
 ### card_played_type
 
-# Test 1: Tablero vacío
+# Test 1: Tablero vacio
 def test_card_played_type_empty_board():
     board = Board(name="Test Board")
     deck = Deck(name="Test Deck", input_deck=[])
@@ -104,20 +104,22 @@ def test_card_played_type_empty_board():
     players = [player]
     
     result = card_played_type(board, deck, player, players)
-    assert result == board.turn_iterator  # Cuando el tablero está vacío, se devuelve el turn_iterator
+    assert result == board.turn_iterator
 
 # Test 2: Carta comodín (wild) de tipo "d" (robar 4 cartas y cambiar color)
 def test_card_played_type_wild_draw_4():
     board = Board(name="Test Board")
     deck = Deck(name="Test Deck", input_deck=[])
-    player = Player(name="Test Player")
-    players = [player]
+    player = Player(name="Test Pl4yer")
+    player_2 = Player(name="Test Pl4yer 2")
+    player_2.hand = [Card(name="g-1", filename=CARD_IMAGE_PATH + "green_1.png"), 
+                   Card(name="y-2", filename=CARD_IMAGE_PATH + "yellow_2.png")] 
+    players = [player,player_2]
     
-    card = Card(name="w-f", filename=CARD_IMAGE_PATH + "wild_pick_four.png")
+    card = Card(name="w-d", filename=CARD_IMAGE_PATH + "wild_pick_four.png")
     board.update_Board(card)
     
     result = card_played_type(board, deck, player, players)
-    # Asegurarse que drop_again sea True
     assert result == True
 
 # Test 3: Carta comodín (wild) de tipo "c" (cambiar de color sin robar)
@@ -125,13 +127,17 @@ def test_card_played_type_wild_choose_color():
     board = Board(name="Test Board")
     deck = Deck(name="Test Deck", input_deck=[])
     player = Player(name="Test Player")
-    players = [player]
+    player.hand = [Card(name="g-1", filename=CARD_IMAGE_PATH + "green_1.png"), 
+                   Card(name="y-2", filename=CARD_IMAGE_PATH + "yellow_2.png")]
+    player_2 = Player(name="Test Player 2")
+    player_2.hand = [Card(name="g-1", filename=CARD_IMAGE_PATH + "green_1.png"), 
+                   Card(name="y-2", filename=CARD_IMAGE_PATH + "yellow_2.png")] 
+    players = [player,player_2]
     
     card = Card(name="w-c", filename=CARD_IMAGE_PATH + "wild_color_changer.png")
     board.update_Board(card)
     
     result = card_played_type(board, deck, player, players)
-    # Asegurarse que drop_again sea True
     assert result == True
 
 # Test 4: Carta de tipo "p" (robar 2 cartas)
@@ -146,7 +152,7 @@ def test_card_played_type_draw_2():
     board.update_Board(card)
     
     result = card_played_type(board, deck, player, players)
-    assert result == False  # La función no debe devolver drop_again
+    assert result == False  # La funcion no debe devolver drop_again
 
 # Test 5: Carta de tipo "s" (saltar turno)
 def test_card_played_type_skip_turn():
@@ -160,7 +166,7 @@ def test_card_played_type_skip_turn():
     board.update_Board(card)
     
     result = card_played_type(board, deck, player, players)
-    assert result == False  # La función no debe devolver drop_again
+    assert result == False
 
 # Test 6: Carta de tipo "r" (invertir orden de turnos)
 def test_card_played_type_reverse_turns():
@@ -173,7 +179,7 @@ def test_card_played_type_reverse_turns():
     board.update_Board(card)
     
     result = card_played_type(board, deck, player, players)
-    assert result == False  # El orden se invierte, pero no hay drop_again
+    assert result == False 
 
 # Test 7: Carta numérica sin efectos adicionales
 def test_card_played_type_number_card():
@@ -186,9 +192,9 @@ def test_card_played_type_number_card():
     board.update_Board(card)
     
     result = card_played_type(board, deck, player, players)
-    assert result == False  # Las cartas numéricas no deberían tener efectos adicionales
+    assert result == False 
 
-# Test 8: Carta numérica pero tablero vacío (caso especial)
+# Test 8: Carta numérica pero tablero vacio (caso especial)
 def test_card_played_type_number_card_empty_board():
     board = Board(name="Test Board")
     deck = Deck(name="Test Deck", input_deck=[])
@@ -196,9 +202,8 @@ def test_card_played_type_number_card_empty_board():
     players = [player]
     
     card = Card(name="r-5", filename=CARD_IMAGE_PATH + "red_5.png")
-    board.card_stack = []  # Tablero vacío
+    board.card_stack = []  # Tablero vacio
     
     result = card_played_type(board, deck, player, players)
-    assert result == board.turn_iterator  # El tablero vacío debería devolver el turn_iterator
-
+    assert result == board.turn_iterator 
 ###

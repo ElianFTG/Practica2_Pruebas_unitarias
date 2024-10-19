@@ -1,6 +1,4 @@
 import pytest
-import sys
-import os
 from card_logic import *
 from game_classes import *
 

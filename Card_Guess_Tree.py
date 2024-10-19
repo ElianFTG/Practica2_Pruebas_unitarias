@@ -2,18 +2,7 @@ from AI_classes import Branch
 from AI_classes import Leaf
 import game_classes
 
-
-def travel_Card_Guess_Tree(Card_Tree, max_depth):
-    """
-    Function that recursively travels Card_Guess_Tree.
-
-    O(n) runtime which is bounded by max_depth
-    """
-    # list that will be appened card data in the format of
-    # [(card1_color, depth), (card1_type, depth), (card2_color, depth)...]
-    Card_Guess_list = []
-
-    def travel_recus(Card_Tree, depth):
+def travel_recus(Card_Tree, depth,Card_Guess_list):
         """
         O(1) runtime
         """
@@ -34,11 +23,22 @@ def travel_Card_Guess_Tree(Card_Tree, max_depth):
         Card_Guess_list.append(Card_Played_By)  # O(1)
 
         # go to the next level of Card_Guess_Tree which is in the left_tree
-        travel_recus(left_tree, depth + 3)
+        travel_recus(left_tree, depth + 3,Card_Guess_list)
 
         return None
 
-    travel_recus(Card_Tree, 0)
+
+def travel_Card_Guess_Tree(Card_Tree, max_depth):
+    """
+    Function that recursively travels Card_Guess_Tree.
+
+    O(n) runtime which is bounded by max_depth
+    """
+    # list that will be appened card data in the format of
+    # [(card1_color, depth), (card1_type, depth), (card2_color, depth)...]
+    Card_Guess_list = []
+
+    travel_recus(Card_Tree, 0, Card_Guess_list)
     slice_num = None
     # find the point in Card_Guess_list where the maximum depth is passed
     for i in range(len(Card_Guess_list)):  # O(n)
@@ -124,33 +124,33 @@ class Card_Guess_Tree:
         self.Guess_Tree = Branch(None, Guess_Tree, card_Branch)
 
 
-def test_Card_Guess_Tree():
-    """
-    Function that tests all the base functions of implementing a
-    Card_Guess_Tree: creating the treem adding new cards, and extracting
-    cards with a memory limit.
-    """
-    test_tree = Card_Guess_Tree("test", 3)
+# def test_Card_Guess_Tree():
+#     """
+#     Function that tests all the base functions of implementing a
+#     Card_Guess_Tree: creating the treem adding new cards, and extracting
+#     cards with a memory limit.
+#     """
+#     test_tree = Card_Guess_Tree("test", 3)
 
-    card1 = card_g = game_classes.Card("g_1", "small_cards/green_0.png", None)
-    card2 = card_g = game_classes.Card("g_2", "small_cards/green_0.png", None)
-    card3 = card_g = game_classes.Card("r_r", "small_cards/green_0.png", None)
+#     card1 = card_g = game_classes.Card("g_1", "small_cards/green_0.png", None)
+#     card2 = card_g = game_classes.Card("g_2", "small_cards/green_0.png", None)
+#     card3 = card_g = game_classes.Card("r_r", "small_cards/green_0.png", None)
 
-    test_tree.update_card_tree(card3)
-    test_tree.update_card_tree(card2)
-    test_tree.update_card_tree(card1)
-    test_tree.update_card_tree(card3)
-    test_tree.update_card_tree(card2)
-    test_tree.update_card_tree(card1)
-    test_tree.update_card_tree(card3)
-    test_tree.update_card_tree(card2)
-    test_tree.update_card_tree(card1)
-    test_tree.update_card_tree(card3)
-    test_tree.update_card_tree(card2)
-    test_tree.update_card_tree(card1)
+#     test_tree.update_card_tree(card3)
+#     test_tree.update_card_tree(card2)
+#     test_tree.update_card_tree(card1)
+#     test_tree.update_card_tree(card3)
+#     test_tree.update_card_tree(card2)
+#     test_tree.update_card_tree(card1)
+#     test_tree.update_card_tree(card3)
+#     test_tree.update_card_tree(card2)
+#     test_tree.update_card_tree(card1)
+#     test_tree.update_card_tree(card3)
+#     test_tree.update_card_tree(card2)
+#     test_tree.update_card_tree(card1)
 
-    print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 3))
-    print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 4))
-    print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 5))
-    print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 6))
-    print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 7))
+#     print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 3))
+#     print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 4))
+#     print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 5))
+#     print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 6))
+#     print(travel_Card_Guess_Tree(test_tree.Guess_Tree, 7))

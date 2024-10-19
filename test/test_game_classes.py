@@ -1,5 +1,6 @@
 import pytest
 from game_classes import *
+from AI_card_logic import *
 
 
 # Tests para la clase Card
@@ -41,7 +42,7 @@ def test_player_init():
     assert player.hand == []
     assert player.skip is False
 
-def test_grab_card(setup_game):
+def test_player_grab_card(setup_game):
     player, deck = setup_game
     player.grab_card(deck)
 

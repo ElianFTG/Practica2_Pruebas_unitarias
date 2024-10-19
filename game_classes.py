@@ -4,9 +4,9 @@ import pygame
 
 class Player:
 
-    def __init__(self, name):
+    def __init__(self, name, hand=None):
         self.name = name
-        self.hand = []
+        self.hand = hand if hand is not None else []
         self.skip = False
 
         # AI vairables only

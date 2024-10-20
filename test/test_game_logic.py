@@ -34,15 +34,42 @@ class MockPlayer:
         if deck:
             self.hand.append(deck.pop())
 
-
+class MockImage:
+    def get_rect(self):
+        return pygame.Rect(0, 0, 100, 150) 
 
 class MockCard:
     def __init__(self, old_val=0):
         self.old_val = old_val
+        self.card_data = MockImage() 
 
 class MockBoard:
     def __init__(self):
         self.turn_iterator = iter(range(100))
+        self.card_stack = [] 
+        
+
+class MockDeck:
+    def __init__(self):
+        self.cards = ["Card1", "Card2", "Card3"]  # Simulamos un mazo con 3 cartas
+
+    def pop(self):
+        return self.cards.pop()  # El método pop para sacar una carta del mazo
+
+
+
+
+class MockSurface:
+    def get_rect(self):
+        return pygame.Rect(0, 0, 100, 150)  # Simulamos un rectángulo cualquiera
+
+    def get_size(self):
+        return (100, 150)  # Simulamos el tamaño de la imagen
+
+def mock_load_image(filename):
+    return MockSurface()  # Retornamos un objeto que puede ser escalado por pygame
+
+
 
 
 
@@ -414,3 +441,77 @@ def test_extern_player_turn_multiple_playable_cards(monkeypatch):
 
     assert turn == 0
     
+def mock_player_LR_selection_hand(player, selected, board, allowed_card_list):
+    return (True, allowed_card_list[0] if allowed_card_list else None, True)
+
+def test_intern_player_turn_empty_allowed_card_list(monkeypatch):
+    # Mock objects
+    mock_board = MockBoard()
+    mock_deck = [1, 2, 3]
+    mock_player = MockPlayer("Player1")
+    allowed_card_list = []
+    selected = None
+
+    monkeypatch.setattr(game_control, 'player_LR_selection_hand', mock_player_LR_selection_hand)
+
+    update, selected, turn_done = intern_player_turn(mock_board, mock_deck, mock_player, allowed_card_list, selected)
+
+    assert update == True
+    assert selected == None
+    assert turn_done == True
+    assert len(mock_player.hand) == 1
+
+def test_intern_player_turn_non_empty_allowed_card_list(monkeypatch):
+    # Mock objects
+    mock_board = MockBoard()
+    mock_deck = [1, 2, 3]
+    mock_player = MockPlayer("Player1")
+    allowed_card_list = [1]
+    selected = None
+
+    monkeypatch.setattr(game_control, 'player_LR_selection_hand', mock_player_LR_selection_hand)
+
+    update, selected, turn_done = intern_player_turn(mock_board, mock_deck, mock_player, allowed_card_list, selected)
+
+    assert update == True
+    assert selected == 1
+    assert turn_done == True
+    assert len(mock_player.hand) == 0 
+
+
+def test_game_loop():
+    class SimpleBoard:
+        def __init__(self):
+            self.turn_iterator = 1
+
+    class SimpleDeck:
+        def __init__(self):
+            self.cards = ["Card_one", "Card_two", "Card_three"]
+
+    class SimplePlayer:
+        def __init__(self, name, AI=False, skip=False):
+            self.name = name
+            self.hand = []
+            self.AI = AI
+            self.skip = skip
+
+        def grab_card(self, deck):
+            if deck.cards:
+                self.hand.append(deck.cards.pop())
+
+    def game_loop(board, deck, players):
+        for player in players:
+            if not player.skip:
+                player.grab_card(deck)
+                board.turn_iterator += 1
+
+    board = SimpleBoard()
+    deck = SimpleDeck()
+    players = [SimplePlayer("Player_one"), SimplePlayer("Player_two", AI=True), SimplePlayer("Player_three", skip=True)]
+
+    game_loop(board, deck, players)
+
+    assert len(players[0].hand) == 1
+    assert len(players[1].hand) == 1
+    assert len(players[2].hand) == 0
+    assert board.turn_iterator == 3

@@ -14,9 +14,6 @@ from game_logic import *
 class MockTree:
     def __init__(self):
         self.value = None
-
-    def get_offshoots(self):
-        return (MockTree(), MockTree())
     
 class MockDecisionTree:
     def __init__(self):
@@ -35,8 +32,7 @@ class MockPlayer:
             self.hand.append(deck.pop())
 
 class MockImage:
-    def get_rect(self):
-        return pygame.Rect(0, 0, 100, 150) 
+    pass
 
 class MockCard:
     def __init__(self, old_val=0):
@@ -47,31 +43,6 @@ class MockBoard:
     def __init__(self):
         self.turn_iterator = iter(range(100))
         self.card_stack = [] 
-        
-
-class MockDeck:
-    def __init__(self):
-        self.cards = ["Card1", "Card2", "Card3"]  # Simulamos un mazo con 3 cartas
-
-    def pop(self):
-        return self.cards.pop()  # El método pop para sacar una carta del mazo
-
-
-
-
-class MockSurface:
-    def get_rect(self):
-        return pygame.Rect(0, 0, 100, 150)  # Simulamos un rectángulo cualquiera
-
-    def get_size(self):
-        return (100, 150)  # Simulamos el tamaño de la imagen
-
-def mock_load_image(filename):
-    return MockSurface()  # Retornamos un objeto que puede ser escalado por pygame
-
-
-
-
 
 def test_update_hatval_try():
     player = "Player A"
@@ -232,8 +203,6 @@ class ForcedExit(Exception):
 def test_check_game_done_all_but_select_up(monkeypatch):
     """Caso que entra a todas las condiciones menos al if select_UP"""
     mock_player = MockPlayer(name="Player 1")
-    def mock_pygame_event():
-        return ['mock_event'] 
     def mock_get_keypress(event):
         return (False, False, False) 
     def mock_draw_winners(winners_list):
@@ -261,16 +230,11 @@ def test_check_game_done_all_but_select_up(monkeypatch):
 def test_check_game_done_no_select_up_or_for_event(monkeypatch):
     """Caso que no entra al select_UP ni al for event pero si al resto"""
     mock_player = MockPlayer(name="Player 1")
-    def mock_pygame_event():
-        return []
-    def mock_get_keypress(event):
-        return (False, False, False)  
     def mock_draw_winners(winners_list):
         print("Mock draw_winners called with:", winners_list)
     def mock_pygame_event_exit():
         raise ForcedExit 
     monkeypatch.setattr('pygame.event.get', mock_pygame_event_exit)
-    monkeypatch.setattr('game_control.get_keypress', mock_get_keypress)
     monkeypatch.setattr('display_funct.draw_winners', mock_draw_winners)
     winners = []
     winners.append(mock_player)

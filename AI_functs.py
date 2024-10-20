@@ -122,10 +122,11 @@ def fetch_most_common_type(player):
             type_dict[card.type] = type_dict[card.type] + 1
         except KeyError:
             type_dict[card.type] = 1
-    max_type = max(type_dict, key=type_dict.get)  # worst O(15) all card types
-    if len(max_type) > 1:
-        max_type = max_type[0]
-    return max_type
+    max_count = max(type_dict.values()) 
+    max_types = [k for k, v in type_dict.items() if v == max_count]  # worst O(15) all card types
+    if len(max_types) > 1: 
+        return max_types
+    return max_types[0]
 
 
 def fetch_most_common_type_playable(board, player):

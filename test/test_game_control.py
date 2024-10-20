@@ -122,32 +122,12 @@ def test_player_choice_target_one_player():
 ###
 
 ### Test para la funcion 
-# Mock de la función get_keypress
-def mock_get_keypress(event):
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_RIGHT:
-            return (False, True, False)
-        elif event.key == pygame.K_LEFT:
-            return (True, False, False)
-        elif event.key == pygame.K_UP:
-            return (False, False, True)
-    return (False, False, False)
-
-# Mock de la función select_move_target
-def mock_select_move_target(select_L, select_R, players, selected):
-    if select_L:
-        return selected - 1 if selected > 0 else len(players) - 1
-    elif select_R:
-        return (selected + 1) % len(players)
-    return selected
 
 # Prueba 1: Selección hacia la derecha
 def test_selection_right():
     players = [0, 1, 2]
     selected = 0
     pygame.event.get = MagicMock(return_value=[pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_RIGHT})])
-    get_keypress = MagicMock(side_effect=mock_get_keypress)
-    select_move_target = MagicMock(side_effect=mock_select_move_target)
     update, selected_new, turn_done = player_LR_selection_target(players, selected)
     assert update is True
     assert selected_new == 1
@@ -158,8 +138,6 @@ def test_selection_left():
     players = [0, 1, 2]
     selected = 1
     pygame.event.get = MagicMock(return_value=[pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_LEFT})])
-    get_keypress = MagicMock(side_effect=mock_get_keypress)
-    select_move_target = MagicMock(side_effect=mock_select_move_target)
     update, selected_new, turn_done = player_LR_selection_target(players, selected)
     assert update is True
     assert selected_new == 0
@@ -170,7 +148,6 @@ def test_selection_no_change():
     players = [0, 1, 2]
     selected = 1
     pygame.event.get = MagicMock(return_value=[pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_LEFT})])
-    get_keypress = MagicMock(side_effect=mock_get_keypress)
     select_move_target = MagicMock(return_value=1)  # Selección permanece igual
     update, selected_new, turn_done = player_LR_selection_target(players, selected)
     assert update is True
@@ -182,7 +159,6 @@ def test_confirm_selection():
     players = [0, 1, 2]
     selected = 0
     pygame.event.get = MagicMock(return_value=[pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_UP})])
-    get_keypress = MagicMock(side_effect=mock_get_keypress)
     update, selected_new, turn_done = player_LR_selection_target(players, selected)
     assert update is True
     assert selected_new == 0
@@ -193,7 +169,6 @@ def test_no_event():
     players = [0, 1, 2]
     selected = 0
     pygame.event.get = MagicMock(return_value=[])  # No eventos
-    get_keypress = MagicMock(side_effect=mock_get_keypress)
     update, selected_new, turn_done = player_LR_selection_target(players, selected)
     assert update is False
     assert selected_new == 0
@@ -208,8 +183,6 @@ def test_selection_right_and_confirm():
         pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_UP})
     ]
     pygame.event.get = MagicMock(return_value=events)
-    get_keypress = MagicMock(side_effect=mock_get_keypress)
-    select_move_target = MagicMock(side_effect=mock_select_move_target)
     update, selected_new, turn_done = player_LR_selection_target(players, selected)
     assert update is True
     assert selected_new == 0
@@ -220,7 +193,6 @@ def test_no_selection_no_confirm():
     players = [0, 1, 2]
     selected = 0
     pygame.event.get = MagicMock(return_value=[pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_DOWN})])
-    get_keypress = MagicMock(side_effect=mock_get_keypress)
     update, selected_new, turn_done = player_LR_selection_target(players, selected)
     assert update is False
     assert selected_new == 0

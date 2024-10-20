@@ -99,14 +99,14 @@ class Board:
 class Card:
     # class method defining a card and provides pygame data callouts
 
-    def __init__(self, name, filename, owner=None):
+    def __init__(self, name, filename, owner=None, old_val=0):
         self.name = name
         self.card_data = pygame.image.load(filename)
         self.rect = self.card_data.get_rect()
         self.Owner = owner
         self.color = name[0]
         self.type = name[2]
-        self.old_val = 0
+        self.old_val = old_val
 
     def set_Owner(self, owner):  # set/change card ownership
         self.Owner = owner

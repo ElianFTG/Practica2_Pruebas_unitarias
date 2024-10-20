@@ -1,4 +1,7 @@
 import pytest
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pytest_mock import MockerFixture
 
 import card_logic
@@ -6,9 +9,18 @@ import display_funct
 import game_control
 import Main_Decision_Tree
 import pygame
-
 from game_logic import *
 
+class MockTree:
+    def __init__(self):
+        self.value = None
+
+    def get_offshoots(self):
+        return (MockTree(), MockTree())
+    
+class MockDecisionTree:
+    def __init__(self):
+        self.Dec_Tree = MockTree()
 
 class MockPlayer:
     def __init__(self, name, hand=None, hatval=None, AI=False, skip=False):
@@ -17,11 +29,20 @@ class MockPlayer:
         self.hatval = hatval if hatval else {}
         self.AI = AI
         self.skip = skip
+        self.Main_Decision_Tree = MockDecisionTree()
+    def grab_card(self, deck):
+        if deck:
+            self.hand.append(deck.pop())
+
 
 
 class MockCard:
     def __init__(self, old_val=0):
         self.old_val = old_val
+
+class MockBoard:
+    def __init__(self):
+        self.turn_iterator = iter(range(100))
 
 
 
@@ -165,111 +186,231 @@ def test_check_winners_no_if():
     
 
 def test_check_game_done(monkeypatch):
-    # Simulamos un jugador con cartas y el evento del final del juego
     mock_player = MockPlayer(name="Player 1")
-    
-    # Simulamos eventos de pygame para evitar el while 1
     def mock_pygame_event():
-        return ['mock_event']  # Simulamos eventos vacíos
-
+        return ['mock_event']
     def mock_get_keypress(event):
-        return (False, False, True)  # Simulamos que se presiona UP para salir del bucle
-
+        return (False, False, True)
     def mock_draw_winners(winners_list):
         print("Mock draw_winners called with:", winners_list)
-
-    # Usamos monkeypatch para reemplazar funciones globales o módulos
     monkeypatch.setattr('pygame.event.get', mock_pygame_event)
     monkeypatch.setattr('game_control.get_keypress', mock_get_keypress)
     monkeypatch.setattr('display_funct.draw_winners', mock_draw_winners)
-
-    # Llamamos a la función con un solo jugador, el juego debería terminar
     players = [mock_player]
     result = check_game_done(players)
-    
-    # Comprobamos que la función devolvió True (el juego terminó)
     assert result == True
 
-
-
-# Excepción personalizada para salir del bucle
 class ForcedExit(Exception):
     pass
-
 def test_check_game_done_all_but_select_up(monkeypatch):
     """Caso que entra a todas las condiciones menos al if select_UP"""
     mock_player = MockPlayer(name="Player 1")
-    
-    # Simulamos eventos de pygame sin presionar UP
     def mock_pygame_event():
-        return ['mock_event']  # Simulamos eventos vacíos
-
+        return ['mock_event'] 
     def mock_get_keypress(event):
-        return (False, False, False)  # No se presiona UP
-
+        return (False, False, False) 
     def mock_draw_winners(winners_list):
         print("Mock draw_winners called with:", winners_list)
-
-    # Simulamos forzar la salida del while 1 después de hacer el trabajo necesario
     event_count = 0
     def mock_pygame_event_exit():
         nonlocal event_count
-        if event_count < 2:  # Permitimos que el bucle se ejecute 2 veces antes de forzar la salida
+        if event_count < 2:
             event_count += 1
             return ['mock_event']
-        raise ForcedExit  # Forzamos la salida del bucle después de 2 eventos
-
+        raise ForcedExit  
     monkeypatch.setattr('pygame.event.get', mock_pygame_event_exit)
     monkeypatch.setattr('game_control.get_keypress', mock_get_keypress)
     monkeypatch.setattr('display_funct.draw_winners', mock_draw_winners)
-
     winners = []
-
     players = [mock_player]
-    
     winners.append(mock_player)
-    # Capturamos la excepción para evitar que la prueba falle debido a la salida forzada
     try:
         result = check_game_done(players)
     except ForcedExit:
-        result = False  # Establecemos el valor de result si se fuerza la salida
-
-    # Comprobamos que el resultado es False ya que no se presionó UP
+        result = False 
     assert result == False
     assert winners == [mock_player]
-
 
 def test_check_game_done_no_select_up_or_for_event(monkeypatch):
     """Caso que no entra al select_UP ni al for event pero si al resto"""
     mock_player = MockPlayer(name="Player 1")
-
-    # Simulamos eventos vacíos para evitar el for
     def mock_pygame_event():
         return []
-
     def mock_get_keypress(event):
-        return (False, False, False)  # No se presiona UP
-
+        return (False, False, False)  
     def mock_draw_winners(winners_list):
         print("Mock draw_winners called with:", winners_list)
-
-    # Simulamos una salida forzada después de 1 iteración del bucle
     def mock_pygame_event_exit():
-        raise ForcedExit  # Forzamos la salida del bucle
-
+        raise ForcedExit 
     monkeypatch.setattr('pygame.event.get', mock_pygame_event_exit)
     monkeypatch.setattr('game_control.get_keypress', mock_get_keypress)
     monkeypatch.setattr('display_funct.draw_winners', mock_draw_winners)
-
     winners = []
     winners.append(mock_player)
-
     try:
         players = [mock_player]
         result = check_game_done(players)
     except ForcedExit:
         result = False
-
     assert result == False
     assert winners == [mock_player]
 
+def test_check_game_done_enters_for_but_not_while(monkeypatch):
+    """Prueba que entra al if len(players) <= 1, ejecuta el for pero no el while."""
+    mock_player_1 = MockPlayer(name="Player 1")
+    def mock_draw_winners(winners_list):
+        print("Mock draw_winners called with:", winners_list)
+    def mock_pygame_event_get():
+        raise ForcedExit  
+    monkeypatch.setattr('display_funct.draw_winners', mock_draw_winners)
+    monkeypatch.setattr('pygame.event.get', mock_pygame_event_get)
+    winners = []
+    winners.append(mock_player_1)
+    players = [mock_player_1]
+    try:
+        result = check_game_done(players)
+    except ForcedExit:
+        result = False  
+    assert result == False
+    assert len(winners) == 1
+    assert winners[0] == mock_player_1
+
+def test_check_game_done_first_if_only(monkeypatch):
+    """Prueba que solo entra al if len(players) <= 1 y no ejecuta el for ni el while."""
+    mock_player = MockPlayer(name="Player 1")
+    def mock_draw_winners(winners_list):
+        print("Mock draw_winners called with:", winners_list)
+    def mock_pygame_event_get():
+        raise ForcedExit 
+    monkeypatch.setattr('display_funct.draw_winners', mock_draw_winners)
+    monkeypatch.setattr('pygame.event.get', mock_pygame_event_get)
+    winners = []
+    players = [mock_player]
+    try:
+        result = check_game_done(players)
+    except ForcedExit:
+        result = False  
+    assert result == False
+    assert len(winners) == 0
+
+def test_check_game_done_no_conditions(monkeypatch):
+    """Caso que no entra a ninguna condición, más de un jugador"""
+    mock_player1 = MockPlayer(name="Player 1")
+    mock_player2 = MockPlayer(name="Player 2")
+    players = [mock_player1, mock_player2]
+    result = check_game_done(players)
+    assert result == False
+
+
+
+
+def test_extern_AI_player_turn(monkeypatch):
+    mock_board = {}
+    mock_deck = [MockCard(old_val=1), MockCard(old_val=2)]
+    mock_player = MockPlayer("AI_Player", hand=[], AI=True)
+    mock_players = [mock_player]
+    mock_turn = 0
+
+    global increment_card_old_vals_called
+    global travel_Main_Decision_Tree_called
+    global degrade_hatval_called
+
+    increment_card_old_vals_called = False
+    travel_Main_Decision_Tree_called = False
+    degrade_hatval_called = False
+
+    def mock_increment_card_old_vals(player):
+        global increment_card_old_vals_called
+        increment_card_old_vals_called = True
+
+    def mock_travel_Main_Decision_Tree(board, deck, player, players, tree):
+        global travel_Main_Decision_Tree_called
+        travel_Main_Decision_Tree_called = True
+
+    def mock_degrade_hatval(player):
+        global degrade_hatval_called
+        degrade_hatval_called = True
+
+    monkeypatch.setattr('game_logic.increment_card_old_vals', mock_increment_card_old_vals)
+    monkeypatch.setattr('game_logic.Main_Decision_Tree.travel_Main_Decision_Tree', mock_travel_Main_Decision_Tree)
+    monkeypatch.setattr('game_logic.degrade_hatval', mock_degrade_hatval)
+    extern_AI_player_turn(mock_board, mock_deck, mock_player, mock_players, mock_turn)
+    assert increment_card_old_vals_called, "increment_card_old_vals was not called"
+    assert travel_Main_Decision_Tree_called, "travel_Main_Decision_Tree was not called"
+    assert degrade_hatval_called, "degrade_hatval was not called"
+    assert degrade_hatval_called, "degrade_hatval was not called"
+
+def mock_intern_player_turn(board, deck, player, allowed_card_list, selected):
+    return (True, allowed_card_list[0] if allowed_card_list else None, True)
+
+def test_extern_player_turn_no_playable_cards(monkeypatch):
+    mock_board = MockBoard()
+    mock_deck = [1, 2, 3]
+    mock_player = MockPlayer("Player1")
+    mock_players = [mock_player]
+    mock_turn = 0
+
+    monkeypatch.setattr(card_logic, 'card_allowed', lambda board, player: [])
+    monkeypatch.setattr(display_funct, 'redraw_screen', lambda *args: None)
+    monkeypatch.setattr('game_logic.compute_turn', lambda players, turn, iterator: turn + 1)
+
+    player, turn = extern_player_turn(mock_board, mock_deck, mock_player, mock_players, mock_turn)
+
+    assert len(mock_player.hand) == 1
+    assert turn == 1
+
+def test_extern_player_turn_playable_card_no_drop_again(monkeypatch):
+    mock_board = {}
+    mock_deck = [1, 2, 3]
+    mock_player = MockPlayer("Player1")
+    mock_players = [mock_player]
+    mock_turn = 0
+
+    monkeypatch.setattr(card_logic, 'card_allowed', lambda board, player: [1])
+    monkeypatch.setattr(display_funct, 'redraw_screen', lambda *args: None)
+    monkeypatch.setattr('game_logic.intern_player_turn', mock_intern_player_turn)
+    monkeypatch.setattr('game_logic.check_winners', lambda player: None)
+    monkeypatch.setattr('game_logic.check_update', lambda *args: True)
+    monkeypatch.setattr(card_logic, 'card_played_type', lambda *args: False)
+
+    player, turn = extern_player_turn(mock_board, mock_deck, mock_player, mock_players, mock_turn)
+
+    assert turn == 0
+
+def test_extern_player_turn_playable_card_with_drop_again(monkeypatch):
+    # Mock objects
+    mock_board = MockBoard()
+    mock_deck = [1, 2, 3]
+    mock_player = MockPlayer("Player1")
+    mock_players = [mock_player]
+    mock_turn = 0
+
+    monkeypatch.setattr(card_logic, 'card_allowed', lambda board, player: [1])
+    monkeypatch.setattr(display_funct, 'redraw_screen', lambda *args: None)
+    monkeypatch.setattr('game_logic.intern_player_turn', mock_intern_player_turn)
+    monkeypatch.setattr('game_logic.check_winners', lambda player: None)
+    monkeypatch.setattr('game_logic.check_update', lambda *args: True)
+    monkeypatch.setattr(card_logic, 'card_played_type', lambda *args: False)
+
+    player, turn = extern_player_turn(mock_board, mock_deck, mock_player, mock_players, mock_turn)
+    assert turn == mock_turn
+
+
+def test_extern_player_turn_multiple_playable_cards(monkeypatch):
+    mock_board = {}
+    mock_deck = [1, 2, 3]
+    mock_player = MockPlayer("Player1")
+    mock_players = [mock_player]
+    mock_turn = 0
+
+    monkeypatch.setattr(card_logic, 'card_allowed', lambda board, player: [1, 2])
+    monkeypatch.setattr(display_funct, 'redraw_screen', lambda *args: None)
+    monkeypatch.setattr('game_logic.intern_player_turn', mock_intern_player_turn)
+    monkeypatch.setattr('game_logic.check_winners', lambda player: None)
+    monkeypatch.setattr('game_logic.check_update', lambda *args: True)
+    monkeypatch.setattr(card_logic, 'card_played_type', lambda *args: False)
+
+    player, turn = extern_player_turn(mock_board, mock_deck, mock_player, mock_players, mock_turn)
+
+    assert turn == 0
+    

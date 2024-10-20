@@ -8,13 +8,12 @@ from Card_Guess_Tree import *
 # Mocks para read_Card_Tree_basic y read_Card_Tree_values
 def mock_read_Card_Tree_basic(Card_Tree):
     """ Retorna un subárbol izquierdo y derecho falso. """
+    values = (None, None)
     if Card_Tree == "None":
-        return (None, None)
-    if Card_Tree == "only_left":
-        return (1, None)
-    if Card_Tree == "only_right":
-        return (None, 1)
-    return (1, 1)
+        values = (None, None)
+    elif Card_Tree == "only_right":
+        values = (None, 1)
+    return values
 
 def mock_read_Card_Tree_values(right_tree, depth):
     """ Retorna valores falsos para una carta. """

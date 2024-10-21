@@ -1,7 +1,6 @@
 import pytest
 from AI_functs import *
 from game_classes import *
-from unittest.mock import patch, MagicMock
 
 
 def test_get_rand_type():
@@ -63,8 +62,6 @@ def test_play_win_vacio(setup_play_win, mock_ai_card_logic):
     
     assert len(player.hand) == 0
     assert board.color in ["r", "g", "b", "y"]
-
-# AI_functs.py                      133      9    93%   41-44, 57, 100-101, 147-148, 195, 256
 
 @pytest.fixture
 def mock_player():
@@ -146,8 +143,8 @@ def test_fmct_empate(mock_tied_type_player):
 @pytest.fixture
 def mock_player_reds():
     return Player("TestPlayer",hand=[
-        Card("r_2", "small_cards/red_2.png"),  # Carta roja
-        Card("r_3", "small_cards/red_3.png"),  # Carta roja
+        Card("r_2", "small_cards/red_2.png"),
+        Card("r_3", "small_cards/red_3.png"),  
     ])
 
 def test_fetch_most_common_type_playable(mock_player_reds):
@@ -174,9 +171,9 @@ def test_fetch_oldest_card(mock_player_with_old_card):
 @pytest.fixture
 def mock_winners():
     return [
-        Player("Player1", hand=[Card("r_1", "small_cards/red_1.png")]),  # Tiene 1 carta
-        Player("Player2", hand=[Card("g_1", "small_cards/green_1.png")]),  # Tiene 1 carta
-        Player("AI_Player", hand=[Card("b_1", "small_cards/blue_1.png"), Card("b_2", "small_cards/blue_2.png")]),  # Tiene 2 cartas
+        Player("Player1", hand=[Card("r_1", "small_cards/red_1.png")]),  
+        Player("Player2", hand=[Card("g_1", "small_cards/green_1.png")]),  
+        Player("AI_Player", hand=[Card("b_1", "small_cards/blue_1.png"), Card("b_2", "small_cards/blue_2.png")]), 
     ]
 
 def test_fetch_possible_winner(mock_winners):
@@ -221,7 +218,6 @@ def test_fetch_hate_cards():
 def mock_fetch_hate_cards(board, player):
     return [('hate_card_type', 0)]
 
-# Mock de la lógica de IA
 class MockAI:
     called = False  
 
@@ -256,13 +252,11 @@ def test_stop_winners(setup_stop):
     # Llama a la función que estamos probando
     stop_winners(board, deck, player, players, possible_winner)
 
-    # Verifica que se haya llamado a play_card con el argumento correcto
-    assert player.play_card_called_with is not None  # Verifica que se haya llamado
-    assert player.play_card_called_with[0] == board  # Verifica que el primer argumento sea el tablero
-    assert player.play_card_called_with[1] == 0  # Verifica que el segundo argumento sea el índice de la carta de odio
+    assert player.play_card_called_with is not None  
+    assert player.play_card_called_with[0] == board 
+    assert player.play_card_called_with[1] == 0  
 
-    # Verifica que se haya llamado a AI_card_logic.AI_card_played_type
-    assert MockAI.called  # Verifica que la función fue llamada
+    assert MockAI.called 
     MockAI.called = False 
 
 #Tests para fetch_hate_priority
